@@ -82,6 +82,7 @@ export const FolderTree = (props: FolderTreeProps) => {
 
 const FolderTreeNode = (props: { path: string }) => {
   const { isHidePath } = useUtil()
+  const t = useT()
   const [children, setChildren] = createSignal<Obj[]>()
   const {
     value,
@@ -142,6 +143,8 @@ const FolderTreeNode = (props: { path: string }) => {
                 transform={isOpen() ? "rotate(90deg)" : "none"}
                 transition="transform 0.2s"
                 cursor="pointer"
+                aria-expanded={isOpen()}
+                aria-label={isOpen() ? t('global.collapse_folder', { folderName: pathBase(props.path) }, `Collapse ${pathBase(props.path)}`) : t('global.expand_folder', { folderName: pathBase(props.path) }, `Expand ${pathBase(props.path)}`)}
                 onClick={() => {
                   onToggle()
                   if (isOpen()) {
@@ -260,6 +263,7 @@ export const FolderChooseInput = (props: {
           onInput={(e) => props.onChange(e.currentTarget.value)}
           readOnly={props.onlyFolder}
           onClick={props.onlyFolder ? onOpen : () => {}}
+          aria-label={t(props.onlyFolder ? 'global.choose_folder' : 'global.choose_or_input_path', props.onlyFolder ? 'Choose folder' : 'Choose or input path')}
           placeholder={t(
             `global.${
               props.onlyFolder ? "choose_folder" : "choose_or_input_path"

@@ -86,6 +86,12 @@ const SideMenuItemWithChildren = (props: SideMenuItemProps) => {
   const { pathname } = useRouter()
   const [open, setOpen] = createSignal(pathname().includes(props.to))
   const t = useT()
+  // The translation for props.title might be complex if it's already a translated string.
+  // However, the requirement is to use t(props.title) as the section name.
+  // If props.title is a key like "manage.users", t(props.title) will work.
+  // If props.title is already "Users", t("Users") might return "Users" or a key if it exists.
+  // For simplicity, adhering to the prompt's t(props.title) for sectionName.
+  const sectionName = () => t(props.title)
   return (
     <Box w="$full">
       <Flex
@@ -111,6 +117,8 @@ const SideMenuItemWithChildren = (props: SideMenuItemProps) => {
           as={BiSolidRightArrow}
           transform={open() ? "rotate(90deg)" : "none"}
           transition="transform 0.2s"
+          aria-expanded={open()}
+          aria-label={open() ? t('global.collapse_section', { sectionName: sectionName() }, `Collapse ${sectionName()}`) : t('global.expand_section', { sectionName: sectionName() }, `Expand ${sectionName()}`)}
         />
       </Flex>
       <Show when={open()}>
@@ -123,8 +131,16 @@ const SideMenuItemWithChildren = (props: SideMenuItemProps) => {
 }
 
 export const SideMenu = (props: { items: SideMenuItemProps[] }) => {
+  const t = useT()
   return (
-    <VStack p="$2" w="$full" color="$neutral11" spacing="$1">
+    <VStack
+      as="nav"
+      aria-label={t('global.manage_sidenav', 'Management navigation')}
+      p="$2"
+      w="$full"
+      color="$neutral11"
+      spacing="$1"
+    >
       <For each={props.items}>
         {(item) => {
           return <SideMenuItem {...item} />

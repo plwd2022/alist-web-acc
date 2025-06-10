@@ -32,6 +32,7 @@ export const Header = () => {
 
   return (
     <Center
+      as="header"
       {...stickyProps}
       bgColor="$background"
       class="header"

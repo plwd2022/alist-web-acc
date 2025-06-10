@@ -48,7 +48,14 @@ export const Nav = () => {
   })
 
   return (
-    <Breadcrumb {...stickyProps} background="$background" class="nav" w="$full">
+    <Breadcrumb
+      as="nav"
+      aria-label={t('global.breadcrumb_nav', 'Breadcrumb navigation')}
+      {...stickyProps}
+      background="$background"
+      class="nav"
+      w="$full"
+    >
       <For each={paths()}>
         {(name, i) => {
           const isLast = createMemo(() => i() === paths().length - 1)

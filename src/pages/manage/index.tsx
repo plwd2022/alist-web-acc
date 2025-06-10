@@ -44,6 +44,7 @@ const Manage = () => {
           }}
           p="$4"
           overflowY="auto"
+          as="main"
         >
           <Routes>
             <For each={routes}>

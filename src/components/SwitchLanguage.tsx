@@ -15,6 +15,7 @@ import { langMap, languages, loadedLangs, setLang } from "~/app/i18n"
 // import { TbLanguageHiragana } from "solid-icons/tb";
 import { IoLanguageOutline } from "solid-icons/io"
 import { Portal } from "solid-js/web"
+import { useT } from "~/hooks/useT"
 
 const [fetchingLang, setFetchingLang] = createSignal(false)
 
@@ -75,6 +76,7 @@ export const SwitchLanguage = <C extends ElementType = "button">(
   )
 }
 
-export const SwitchLanguageWhite = () => (
-  <SwitchLanguage as={IoLanguageOutline} boxSize="$8" />
-)
+export const SwitchLanguageWhite = () => {
+  const t = useT()
+  return <SwitchLanguage as={IoLanguageOutline} boxSize="$8" aria-label={t("global.switch_language", "Switch language")} />
+}

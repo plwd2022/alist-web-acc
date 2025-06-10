@@ -8,7 +8,7 @@ import { UserMethods } from "~/types"
 export const Footer = () => {
   const t = useT()
   return (
-    <VStack class="footer" w="$full" py="$4">
+    <VStack as="footer" class="footer" w="$full" py="$4">
       <HStack spacing="$1">
         <Anchor href="https://github.com/alist-org/alist" external>
           {t("home.footer.powered_by")}

@@ -9,6 +9,7 @@ export const Body = () => {
   return (
     <Container>
       <VStack
+        as="main"
         class="body"
         mt="$1"
         py="$2"

@@ -2,8 +2,10 @@ import { Icon, useColorMode, useColorModeValue } from "@hope-ui/solid"
 // import { IoMoonOutline as Moon } from "solid-icons/io";
 import { FiSun as Sun } from "solid-icons/fi"
 import { FiMoon as Moon } from "solid-icons/fi"
+import { useT } from "~/hooks/useT"
 
 const SwitchColorMode = () => {
+  const t = useT()
   const { toggleColorMode } = useColorMode()
   const icon = useColorModeValue(
     {
@@ -24,6 +26,7 @@ const SwitchColorMode = () => {
       as={icon().component}
       onClick={toggleColorMode}
       p={icon().p}
+      aria-label={t("global.switch_color_mode", "Switch color mode")}
     />
   )
 }

@@ -14,6 +14,7 @@ import { createMemo, For, mergeProps, Show } from "solid-js"
 import { createStore } from "solid-js/store"
 import { FaSolidAngleLeft, FaSolidAngleRight } from "solid-icons/fa"
 import { TbSelector } from "solid-icons/tb"
+import { useT } from "~/hooks/useT"
 
 export interface PaginatorProps {
   colorScheme?:
@@ -34,6 +35,7 @@ export interface PaginatorProps {
   setResetCallback?: (callback: () => void) => void
 }
 export const Paginator = (props: PaginatorProps) => {
+  const t = useT()
   const merged = mergeProps(
     {
       maxShowPage: 4,
@@ -94,7 +96,7 @@ export const Paginator = (props: PaginatorProps) => {
           <IconButton
             size={size}
             icon={<FaSolidAngleLeft />}
-            aria-label="Previous"
+            aria-label={t('global.previous', 'Previous')}
             colorScheme={merged.colorScheme}
             onClick={() => {
               onPageChange(store.current - 1)
@@ -131,6 +133,7 @@ export const Paginator = (props: PaginatorProps) => {
             px="$1"
             variant="solid"
             colorScheme={merged.colorScheme}
+            aria-label={t('global.select_page', 'Select page')}
           >
             <Box px={store.current > 10 ? "$1_5" : "$2"}>{store.current}</Box>
             <TbSelector />
@@ -165,7 +168,7 @@ export const Paginator = (props: PaginatorProps) => {
           <IconButton
             size={size}
             icon={<FaSolidAngleRight />}
-            aria-label="Next"
+            aria-label={t('global.next', 'Next')}
             colorScheme={merged.colorScheme}
             onClick={() => {
               onPageChange(store.current + 1)

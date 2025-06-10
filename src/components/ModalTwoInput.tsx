@@ -11,7 +11,7 @@ import {
   FormHelperText,
   VStack,
 } from "@hope-ui/solid"
-import { createSignal, JSXElement, Show } from "solid-js"
+import { createSignal, JSXElement, Show, createMemo } from "solid-js"
 import { useT } from "~/hooks"
 import { notify } from "~/utils"
 export type ModalTwoInputProps = {
@@ -30,6 +30,7 @@ export const ModalTwoInput = (props: ModalTwoInputProps) => {
   const [value1, setValue1] = createSignal(props.defaultValue1 ?? "") // Update value and setValue to value1 and setValue1
   const [value2, setValue2] = createSignal(props.defaultValue2 ?? "") // Add value2 and setValue2 for second input
   const t = useT()
+  const headerId = createMemo(() => `modal-header-${Math.random().toString(36).substring(2, 9)}`)
   const submit = () => {
     if (!value1() || !value2()) {
       // Check if both input values are not empty
@@ -48,7 +49,7 @@ export const ModalTwoInput = (props: ModalTwoInputProps) => {
       <ModalOverlay />
       <ModalContent>
         {/* <ModalCloseButton /> */}
-        <ModalHeader>{t(props.title)}</ModalHeader>
+        <ModalHeader id={headerId()}>{t(props.title)}</ModalHeader>
         <ModalBody>
           <Show when={props.topSlot}>{props.topSlot}</Show>
           <Show
@@ -59,6 +60,7 @@ export const ModalTwoInput = (props: ModalTwoInputProps) => {
                   id="modal-input1" // Update id to "modal-input1" for first input
                   type={props.type}
                   value={value1()} // Update value to value1 for first input
+                  aria-labelledby={headerId()}
                   onInput={(e) => {
                     setValue1(e.currentTarget.value)
                   }}
@@ -72,6 +74,7 @@ export const ModalTwoInput = (props: ModalTwoInputProps) => {
                   id="modal-input2" // Add second input with id "modal-input2"
                   type={props.type}
                   value={value2()} // Bind value to value2 for second input
+                  aria-labelledby={headerId()}
                   onInput={(e) => {
                     setValue2(e.currentTarget.value)
                   }}
@@ -88,6 +91,7 @@ export const ModalTwoInput = (props: ModalTwoInputProps) => {
               <Textarea
                 id="modal-input1" // Update id to "modal-input1" for first input
                 value={value1()} // Update value to value1 for first input
+                aria-labelledby={headerId()}
                 onInput={(e) => {
                   setValue1(e.currentTarget.value)
                 }}
@@ -95,6 +99,7 @@ export const ModalTwoInput = (props: ModalTwoInputProps) => {
               <Textarea
                 id="modal-input2" // Add second input with id "modal-input2"
                 value={value2()} // Bind value to value2 for second input
+                aria-labelledby={headerId()}
                 onInput={(e) => {
                   setValue2(e.currentTarget.value)
                 }}

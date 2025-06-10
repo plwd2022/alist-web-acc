@@ -2,12 +2,14 @@ import { Box } from "@hope-ui/solid"
 import { SelectWrapper } from "./Base"
 import chardet from "chardet"
 import { createEffect } from "solid-js"
+import { useT } from "~/hooks"
 
 export function EncodingSelect(props: {
   encoding: string
   setEncoding: (encoding: string) => void
   referenceText?: string | ArrayBuffer
 }) {
+  const t = useT()
   const encodingLabels = [
     "utf-8",
     "gbk",
@@ -89,6 +91,7 @@ export function EncodingSelect(props: {
         }))}
         value={props.encoding}
         onChange={(v) => props.setEncoding(v)}
+        ariaLabel={t('global.select_encoding', 'Select encoding')}
       />
     </Box>
   )

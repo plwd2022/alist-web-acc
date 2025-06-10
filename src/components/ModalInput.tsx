@@ -16,6 +16,7 @@ import {
   Show,
   createEffect,
   onCleanup,
+  createMemo,
 } from "solid-js"
 import { useT } from "~/hooks"
 import { notify } from "~/utils"
@@ -37,6 +38,7 @@ export type ModalInputProps = {
 export const ModalInput = (props: ModalInputProps) => {
   const [value, setValue] = createSignal(props.defaultValue ?? "")
   const t = useT()
+  const headerId = createMemo(() => `modal-header-${Math.random().toString(36).substring(2, 9)}`)
 
   let inputRef: HTMLInputElement | HTMLTextAreaElement
 
@@ -94,7 +96,7 @@ export const ModalInput = (props: ModalInputProps) => {
       <ModalOverlay />
       <ModalContent onDrop={(e) => props.onDrop?.(e, setValue)}>
         {/* <ModalCloseButton /> */}
-        <ModalHeader>{t(props.title)}</ModalHeader>
+        <ModalHeader id={headerId()}>{t(props.title)}</ModalHeader>
         <ModalBody>
           <Show when={props.topSlot}>{props.topSlot}</Show>
           <Show
@@ -104,6 +106,7 @@ export const ModalInput = (props: ModalInputProps) => {
                 id="modal-input"
                 type={props.type}
                 value={value()}
+                aria-labelledby={headerId()}
                 ref={(el) => (inputRef = el)}
                 onInput={(e) => {
                   setValue(e.currentTarget.value)
@@ -120,6 +123,7 @@ export const ModalInput = (props: ModalInputProps) => {
             <Textarea
               id="modal-input"
               value={value()}
+              aria-labelledby={headerId()}
               ref={(el) => (inputRef = el)}
               onInput={(e) => {
                 setValue(e.currentTarget.value)

@@ -20,6 +20,7 @@ import { SwitchColorMode } from "./SwitchColorMode"
 import { ComponentProps, For, mergeProps, Show } from "solid-js"
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "solid-icons/ai"
 import { hoverColor } from "~/utils"
+import { useT } from "~/hooks"
 
 export const Error = (props: {
   msg: string
@@ -58,6 +59,7 @@ export const Error = (props: {
 }
 
 export const BoxWithFullScreen = (props: Parameters<typeof Box>[0]) => {
+  const t = useT()
   const { isOpen, onToggle } = createDisclosure()
   return (
     <Box
@@ -77,7 +79,7 @@ export const BoxWithFullScreen = (props: Parameters<typeof Box>[0]) => {
         pos="absolute"
         right="$2"
         bottom="$2"
-        aria-label="toggle fullscreen"
+        aria-label={t('global.toggle_fullscreen', 'Toggle fullscreen')}
         as={isOpen() ? AiOutlineFullscreenExit : AiOutlineFullscreen}
         onClick={onToggle}
         cursor="pointer"
@@ -100,9 +102,15 @@ export function SelectWrapper<T extends string | number>(props: {
   alwaysShowBorder?: boolean
   size?: "xs" | "sm" | "md" | "lg"
   w?: ComponentProps<typeof SelectTrigger>["w"]
+  ariaLabel?: string
 }) {
   return (
-    <Select size={props.size} value={props.value} onChange={props.onChange}>
+    <Select
+      size={props.size}
+      value={props.value}
+      onChange={props.onChange}
+      aria-label={props.ariaLabel}
+    >
       <SelectTrigger
         borderColor={props.alwaysShowBorder ? "$info5" : undefined}
         w={props.w}
