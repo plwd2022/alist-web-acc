@@ -3,7 +3,7 @@ import { Motion } from "@motionone/solid"
 import { useContextMenu } from "solid-contextmenu"
 import { batch, Show } from "solid-js"
 import { CenterLoading, LinkWithPush, ImageWithError } from "~/components"
-import { usePath, useRouter, useUtil } from "~/hooks"
+import { usePath, useRouter, useUtil, useT } from "~/hooks"
 import { checkboxOpen, getMainColor, local, selectIndex } from "~/store"
 import { ObjType, StoreObj } from "~/types"
 import { bus, hoverColor } from "~/utils"
@@ -27,6 +27,7 @@ export const GridItem = (props: { obj: StoreObj; index: number }) => {
   const { pushHref, to } = useRouter()
   const { openWithDoubleClick, toggleWithClick, restoreSelectionCache } =
     useSelectWithMouse()
+  const t = useT() // Requested
   return (
     <Motion.div
       initial={{ opacity: 0, scale: 0.9 }}
@@ -37,6 +38,10 @@ export const GridItem = (props: { obj: StoreObj; index: number }) => {
       }}
     >
       <VStack
+        role="gridcell"
+        aria-selected={props.obj.selected}
+        id={`grid-item-${props.index}`}
+        // tabIndex={0} // Focus managed by parent Grid
         classList={{ selected: !!props.obj.selected }}
         class="grid-item viselect-item"
         data-index={props.index}
@@ -55,6 +60,14 @@ export const GridItem = (props: { obj: StoreObj; index: number }) => {
           openWithDoubleClick() || toggleWithClick() ? "default" : "pointer"
         }
         bgColor={props.obj.selected ? hoverColor() : undefined}
+        on:keydown={(e: KeyboardEvent) => {
+          if (e.key === " ") {
+            if (checkboxOpen()) {
+              e.preventDefault()
+              selectIndex(props.index, !props.obj.selected)
+            }
+          }
+        }}
         on:dblclick={() => {
           if (!openWithDoubleClick()) return
           selectIndex(props.index, true, true)

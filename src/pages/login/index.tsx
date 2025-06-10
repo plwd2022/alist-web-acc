@@ -11,6 +11,7 @@ import {
   VStack,
   Checkbox,
   Icon,
+  Box, // Added Box
 } from "@hope-ui/solid"
 import { createMemo, createSignal, Show, onMount, onCleanup } from "solid-js"
 import { SwitchColorMode, SwitchLanguageWhite } from "~/components"
@@ -56,6 +57,15 @@ const Login = () => {
   const [opt, setOpt] = createSignal("")
   const [useauthn, setuseauthn] = createSignal(false)
   const [remember, setRemember] = createStorageSignal("remember-pwd", "false")
+
+  // Error states and IDs
+  const [usernameError, setUsernameError] = createSignal("")
+  const [passwordError, setPasswordError] = createSignal("")
+  const [otpError, setOtpError] = createSignal("")
+  const usernameErrorId = "username-error-msg"
+  const passwordErrorId = "password-error-msg"
+  const otpErrorId = "otp-error-msg"
+
   const [useLdap, setUseLdap] = createSignal(false)
   const [loading, data] = useFetch(
     async (): Promise<Resp<{ token: string }>> => {
@@ -201,9 +211,24 @@ const Login = () => {
           )
         },
         (msg, code) => {
-          if (!needOpt() && code === 402) {
-            setNeedOpt(true)
+          // Clear all previous errors first
+          setUsernameError("")
+          setPasswordError("")
+          setOtpError("")
+
+          if (code === 401) { // Unauthorized
+            if (msg.toLowerCase().includes("user") || msg.toLowerCase().includes("username")) {
+                setUsernameError(msg)
+            } else if (msg.toLowerCase().includes("password")) {
+                setPasswordError(msg)
+            } else {
+                setUsernameError(msg) // Fallback to username field
+            }
+          } else if (code === 402) { // OTP issues
+            setNeedOpt(true) // Keep existing logic
+            setOtpError(msg) // Display error under OTP field
           } else {
+            // For other errors, use a general notification or a general form error
             notify.error(msg)
           }
         },
@@ -245,34 +270,60 @@ const Login = () => {
               name="otp"
               placeholder={t("login.otp-tips")}
               value={opt()}
-              onInput={(e) => setOpt(e.currentTarget.value)}
+              aria-invalid={!!otpError()}
+              aria-describedby={otpErrorId}
+              onInput={(e) => {
+                setOpt(e.currentTarget.value)
+                setOtpError("")
+              }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  Login()
-                }
+                if (e.key === "Enter") Login()
               }}
             />
+            <Show when={otpError()}>
+              <Box role="alert" id={otpErrorId} color="$danger11" mt="$1_5" fontSize="$sm">
+                {otpError()}
+              </Box>
+            </Show>
           }
         >
           <Input
             name="username"
             placeholder={t("login.username-tips")}
             value={username()}
-            onInput={(e) => setUsername(e.currentTarget.value)}
+            aria-invalid={!!usernameError()}
+            aria-describedby={usernameErrorId}
+            onInput={(e) => {
+              setUsername(e.currentTarget.value)
+              setUsernameError("")
+            }}
           />
+          <Show when={usernameError()}>
+            <Box role="alert" id={usernameErrorId} color="$danger11" mt="$1_5" fontSize="$sm">
+              {usernameError()}
+            </Box>
+          </Show>
           <Show when={!useauthn()}>
             <Input
               name="password"
               placeholder={t("login.password-tips")}
               type="password"
               value={password()}
-              onInput={(e) => setPassword(e.currentTarget.value)}
+              aria-invalid={!!passwordError()}
+              aria-describedby={passwordErrorId}
+              onInput={(e) => {
+                setPassword(e.currentTarget.value)
+                setPasswordError("")
+              }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  Login()
-                }
+                if (e.key === "Enter") Login()
               }}
             />
+            <Show when={passwordError()}>
+              <Box role="alert" id={passwordErrorId} color="$danger11" mt="$1_5" fontSize="$sm">
+                {passwordError()}
+              </Box>
+            </Show>
           </Show>
           <Flex
             px="$1"

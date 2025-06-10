@@ -48,3 +48,35 @@
 .hope-select__option {
   flex-shrink: 0;
 }
+
+/* Custom focus styles for keyboard navigation */
+.list-item:focus-visible,
+.grid-item:focus-visible,
+.list .title > .hope-text:focus-visible { /* Covers Text components within .list .title */
+  outline: 2px solid Highlight; /* Standard system highlight color */
+  outline: 2px solid -webkit-focus-ring-color; /* For Webkit */
+  outline-offset: 1px;
+}
+
+/* If using aria-activedescendant, the container gets focus. Style the active descendant. */
+/* This requires JavaScript to add/remove a class like 'manual-focus' or rely on Hope UI's selected styles if they are sufficient. */
+/* For robust visual indication with aria-activedescendant, you might need to style based on selection/aria-selected if :focus-visible on children isn't triggered. */
+/* The prompt asks for focus-visible on items, which implies items themselves might become focusable or are styled as if they are. */
+/* The current implementation primarily focuses the container (ListLayout/GridLayout). */
+/* The added CSS for .list-item:focus-visible and .grid-item:focus-visible will only apply if these items *actually* receive DOM focus. */
+/* The .list .title > .hope-text:focus-visible should work for the sortable headers as they are made tabIndex=0. */
+
+/* To make aria-activedescendant more visible on the item itself, you could add a specific class to the focused item via JS */
+/* e.g., in ListLayout/GridLayout when focusedIndex changes: */
+/* querySelectorAll('.pseudo-focused').forEach(el => el.classList.remove('pseudo-focused')); */
+/* querySelector(`#list-item-${newIndex}`)?.classList.add('pseudo-focused'); */
+/* Then style .pseudo-focused */
+/* This is out of scope for the current CSS request but noted. */
+
+/* Styles for items focused via aria-activedescendant */
+.image-item.manual-focus,
+.grid-item.manual-focus {
+  outline: 2px solid Highlight; /* Standard system highlight color */
+  outline: 2px solid -webkit-focus-ring-color; /* For Webkit */
+  outline-offset: 1px;
+}

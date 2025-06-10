@@ -33,6 +33,10 @@ export const ImageItem = (props: { obj: StoreObj; index: number }) => {
       }}
     >
       <VStack
+        role="option"
+        id={`image-item-${props.index}`}
+        aria-selected={!!props.obj.selected}
+        tabIndex={-1}
         w="$full"
         classList={{ selected: !!props.obj.selected }}
         class="image-item viselect-item"

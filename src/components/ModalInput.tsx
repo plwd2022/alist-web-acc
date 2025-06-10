@@ -9,6 +9,7 @@ import {
   Input,
   Textarea,
   FormHelperText,
+  Box,
 } from "@hope-ui/solid"
 import {
   createSignal,
@@ -39,6 +40,8 @@ export const ModalInput = (props: ModalInputProps) => {
   const [value, setValue] = createSignal(props.defaultValue ?? "")
   const t = useT()
   const headerId = createMemo(() => `modal-header-${Math.random().toString(36).substring(2, 9)}`)
+  const [inlineError, setInlineError] = createSignal("")
+  const errorId = createMemo(() => `modal-error-${Math.random().toString(36).substring(2, 9)}`)
 
   let inputRef: HTMLInputElement | HTMLTextAreaElement
 
@@ -75,22 +78,33 @@ export const ModalInput = (props: ModalInputProps) => {
   createEffect(() => {
     if (!props.opened) {
       setValue("")
+      setInlineError("") // Clear error when modal is closed/reopened
     }
   })
 
   const submit = () => {
     if (!value()) {
-      notify.warning(t("global.empty_input"))
+      const errorMessage = t("global.empty_input_for_field", { field: t(props.title) }, `${t(props.title)} cannot be empty.`)
+      setInlineError(errorMessage)
+      notify.warning(t("global.empty_input")) // Keeping this as per instruction
       return
     }
+    // Assuming onSubmit might eventually lead to closing the modal, error clearing is handled by props.opened effect or props.onClose.
+    // If onSubmit is successful and modal stays open for some reason, an explicit setInlineError("") might be needed here.
     props.onSubmit?.(value())
   }
+
+  const currentOnClose = () => {
+    setInlineError("")
+    props.onClose()
+  }
+
 
   return (
     <Modal
       blockScrollOnMount={false}
       opened={props.opened}
-      onClose={props.onClose}
+      onClose={currentOnClose} // Use wrapped onClose
       initialFocus="#modal-input"
     >
       <ModalOverlay />
@@ -107,9 +121,12 @@ export const ModalInput = (props: ModalInputProps) => {
                 type={props.type}
                 value={value()}
                 aria-labelledby={headerId()}
+                aria-invalid={!!inlineError()}
+                aria-describedby={inlineError() ? errorId() : (props.tips ? 'modal-tips' : undefined)}
                 ref={(el) => (inputRef = el)}
                 onInput={(e) => {
                   setValue(e.currentTarget.value)
+                  setInlineError("") // Clear error on input
                 }}
                 onFocus={handleFocus}
                 onKeyDown={(e) => {
@@ -124,21 +141,29 @@ export const ModalInput = (props: ModalInputProps) => {
               id="modal-input"
               value={value()}
               aria-labelledby={headerId()}
+              aria-invalid={!!inlineError()}
+              aria-describedby={inlineError() ? errorId() : (props.tips ? 'modal-tips' : undefined)}
               ref={(el) => (inputRef = el)}
               onInput={(e) => {
                 setValue(e.currentTarget.value)
+                setInlineError("") // Clear error on input
               }}
               onFocus={handleFocus}
             />
           </Show>
+          <Show when={inlineError()}>
+            <Box role="alert" id={errorId()} color="$danger11" mt="$1_5" fontSize="$sm">
+              {inlineError()}
+            </Box>
+          </Show>
           <Show when={props.tips}>
-            <FormHelperText>{props.tips}</FormHelperText>
+            <FormHelperText id="modal-tips">{props.tips}</FormHelperText>
           </Show>
           <Show when={props.bottomSlot}>{props.bottomSlot}</Show>
         </ModalBody>
         <ModalFooter display="flex" gap="$2">
           <Show when={props.footerSlot}>{props.footerSlot}</Show>
-          <Button onClick={props.onClose} colorScheme="neutral">
+          <Button onClick={currentOnClose} colorScheme="neutral">
             {t("global.cancel")}
           </Button>
           <Button loading={props.loading} onClick={() => submit()}>

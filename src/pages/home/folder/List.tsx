@@ -1,15 +1,16 @@
 import { HStack, VStack, Text } from "@hope-ui/solid"
-import { batch, createEffect, createSignal, For, Show } from "solid-js"
-import { useT } from "~/hooks"
+import { batch, createEffect, createSignal, For, Show, onMount } from "solid-js"
+import { useT, useRouter } from "~/hooks"
 import {
   allChecked,
   checkboxOpen,
   isIndeterminate,
   objStore,
   selectAll,
+  selectIndex,
   sortObjs,
 } from "~/store"
-import { OrderBy } from "~/store"
+import { OrderBy, StoreObj } from "~/store"
 import { Col, cols, ListItem } from "./ListItem"
 import { ItemCheckbox, useSelectWithMouse } from "./helper"
 import { bus } from "~/utils"
@@ -27,20 +28,31 @@ export const ListTitle = (props: {
     }
   })
   const itemProps = (col: Col) => {
+    const isCurrentSortCol = () => orderBy() === col.name
+    const clickHandler = () => {
+      if (col.name === orderBy()) {
+        setReverse(!reverse())
+      } else {
+        batch(() => {
+          setOrderBy(col.name as OrderBy)
+          setReverse(false)
+        })
+      }
+    }
     return {
       fontWeight: "bold",
       fontSize: "$sm",
       color: "$neutral11",
       textAlign: col.textAlign as any,
       cursor: "pointer",
-      onClick: () => {
-        if (col.name === orderBy()) {
-          setReverse(!reverse())
-        } else {
-          batch(() => {
-            setOrderBy(col.name as OrderBy)
-            setReverse(false)
-          })
+      onClick: clickHandler,
+      tabIndex: 0,
+      role: "button",
+      "aria-label": t('home.obj.' + col.name) + (isCurrentSortCol() ? (reverse() ? t('global.sorted_descending', ' sorted descending') : t('global.sorted_ascending', ' sorted ascending')) : t('global.sortable_column', ' sortable column')),
+      onKeyDown: (e: KeyboardEvent) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          clickHandler()
         }
       },
     }
@@ -74,6 +86,72 @@ export const ListTitle = (props: {
 }
 
 const ListLayout = () => {
+  const t = useT()
+  const { pushHref, to } = useRouter()
+  const [focusedIndex, setFocusedIndex] = createSignal(0)
+  let containerRef: HTMLDivElement | undefined
+
+  // Array to store refs of ListItem elements
+  // However, direct refs to children in a loop are tricky in Solid.
+  // We'll rely on aria-activedescendant and querying the DOM element by ID if needed for scrollIntoView.
+
+  createEffect(() => {
+    if (objStore.objs.length > 0 && focusedIndex() >= objStore.objs.length) {
+      setFocusedIndex(objStore.objs.length - 1)
+    } else if (focusedIndex() < 0 && objStore.objs.length > 0) {
+      setFocusedIndex(0)
+    }
+  })
+
+  const focusItem = (index: number) => {
+    if (index >= 0 && index < objStore.objs.length) {
+      setFocusedIndex(index)
+      const itemElement = containerRef?.querySelector(`#list-item-${index}`)
+      itemElement?.scrollIntoView({ block: "nearest" })
+    }
+  }
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (objStore.objs.length === 0) return
+
+    let newIndex = focusedIndex()
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault()
+        newIndex = (focusedIndex() + 1) % objStore.objs.length
+        break
+      case "ArrowUp":
+        e.preventDefault()
+        newIndex = (focusedIndex() - 1 + objStore.objs.length) % objStore.objs.length
+        break
+      case "Home":
+        e.preventDefault()
+        newIndex = 0
+        break
+      case "End":
+        e.preventDefault()
+        newIndex = objStore.objs.length - 1
+        break
+      case "Enter":
+        e.preventDefault()
+        if (focusedIndex() >= 0 && focusedIndex() < objStore.objs.length) {
+          const obj = objStore.objs[focusedIndex()]
+          to(pushHref(obj.name))
+        }
+        break
+      case " ": // Spacebar
+        e.preventDefault()
+        if (checkboxOpen() && focusedIndex() >= 0 && focusedIndex() < objStore.objs.length) {
+          const currentObj = objStore.objs[focusedIndex()]
+          selectIndex(focusedIndex(), !currentObj.selected)
+        }
+        break
+      default:
+        return
+    }
+    focusItem(newIndex)
+  }
+
   const onDragOver = (e: DragEvent) => {
     const items = Array.from(e.dataTransfer?.items ?? [])
     for (let i = 0; i < items.length; i++) {
@@ -88,17 +166,29 @@ const ListLayout = () => {
   const { isMouseSupported, registerSelectContainer, captureContentMenu } =
     useSelectWithMouse()
   registerSelectContainer()
+
   return (
     <VStack
+      ref={containerRef}
+      role="listbox"
+      aria-label={t('global.file_list_description', 'File and folder list')}
+      aria-activedescendant={objStore.objs.length > 0 ? `list-item-${focusedIndex()}` : undefined}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       onDragOver={onDragOver}
       oncapture:contextmenu={captureContentMenu}
       class="list viselect-container"
       w="$full"
       spacing="$1"
+      // When the list itself is focused, ensure the focused item is visible.
+      // This might need an effect if focusedIndex changes programmatically elsewhere.
+      // For now, keydown handles scrollIntoView.
+      onFocus={() => focusItem(focusedIndex())}
     >
       <ListTitle sortCallback={sortObjs} />
       <For each={objStore.objs}>
         {(obj, i) => {
+          // Pass isFocused or rely on aria-activedescendant for styling if needed
           return <ListItem obj={obj} index={i()} />
         }}
       </For>

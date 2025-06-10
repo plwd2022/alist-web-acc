@@ -43,5 +43,13 @@
   "menu": "Menu",
   "logout": "Logout",
   "expand_section": "Expand {sectionName}",
-  "collapse_section": "Collapse {sectionName}"
+  "collapse_section": "Collapse {sectionName}",
+  "file_list_description": "File and folder list",
+  "file_grid_description": "File and folder grid",
+  "sortable_column": " sortable column",
+  "sorted_ascending": " sorted ascending",
+  "sorted_descending": " sorted descending",
+  "folder_grid_description": "Folder grid",
+  "image_list_description": "Image list",
+  "empty_input_for_field": "{field} cannot be empty."
 }
